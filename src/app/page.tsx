@@ -1,9 +1,30 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function HomePage() {
+  const mockUrl = [
+    "https://picsum.photos/200?random=1",
+    "https://picsum.photos/200?random=2",
+    "https://picsum.photos/200?random=3",
+    "https://picsum.photos/200?random=4",
+  ];
+
+  const mockImages = mockUrl.map((url, index) => ({
+    id: index + 1,
+    url,
+  }));
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      Hello (gallery in progress)
-    </main>
+    <>
+      <main className="">
+        <div className="flex flex-wrap gap-4">
+          {[...mockImages, ...mockImages, ...mockImages].map((image) => (
+            <div key={image.id} className="w-48">
+              <img src={image.url} />
+            </div>
+          ))}
+        </div>
+      </main>
+    </>
   );
 }
