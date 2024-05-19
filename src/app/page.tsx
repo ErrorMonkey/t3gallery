@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { db } from "~/server/db";
+import TestPage from "./TestPage";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <TestPage />
       <main className="">
         <div className="flex flex-wrap gap-4">
           {images.map((post) => (
