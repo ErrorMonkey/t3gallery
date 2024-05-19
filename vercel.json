@@ -1,7 +1,8 @@
 {
   "build": {
     "env": {
-      "PNPM_VERSION": "9.1.1"
+      "PNPM_VERSION": "9.1.1",
+      "COREPACK_ENABLE_STRICT": "0"
     }
   }
 }
