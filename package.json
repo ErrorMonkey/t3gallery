@@ -9,7 +9,8 @@
     "db:studio": "drizzle-kit studio",
     "dev": "next dev --turbo",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "preinstall": "corepack enable && corepack prepare pnpm@9.1.1 --activate"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.10.1",
