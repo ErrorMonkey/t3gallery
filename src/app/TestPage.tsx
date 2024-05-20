@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-// 상수를 컴포넌트 외부로 이동
 const TYPING_SPEED = 75; // 타이핑 속도 (밀리초 단위)
 const ERASING_SPEED = 100; // 지우기 속도 (밀리초 단위)
 const DELAY_BEFORE_ERASE = 2000; // 문장 완성 후 지우기 전 대기 시간 (밀리초 단위)
@@ -13,7 +12,6 @@ const phrases: string[] = [
   "왜 하려는 거야 자꾸?",
 ];
 
-// 한글 자모 분리 함수
 const splitHangul = (str: string): string => {
   const INITIALS = "ᄀᄁᄂᄃᄄᄅᄆᄇᄈᄉᄊᄋᄌᄍᄎᄏᄐᄑᄒ";
   const MEDIALS = "ᅡᅢᅣᅤᅥᅦᅧᅨᅩᅪᅫᅬᅭᅮᅯᅰᅱᅲᅳᅴᅵ";
@@ -40,7 +38,6 @@ const splitHangul = (str: string): string => {
   return split.join("");
 };
 
-// 한글 자모 결합 함수
 const combineHangul = (str: string): string => {
   const INITIALS = "ᄀᄁᄂᄃᄄᄅᄆᄇᄈᄉᄊᄋᄌᄍᄎᄏᄐᄑᄒ";
   const MEDIALS = "ᅡᅢᅣᅤᅥᅦᅧᅨᅩᅪᅫᅬᅭᅮᅯᅰᅱᅲᅳᅴᅵ";
@@ -122,41 +119,48 @@ const TestPage: React.FC = () => {
   const [currentText, setCurrentText] = useState<string>("");
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number>(0);
   const [isErasing, setIsErasing] = useState<boolean>(false);
+  const [cursorVisible, setCursorVisible] = useState<boolean>(true);
 
-  useEffect(() => {
-    const handleTyping = () => {
+  const requestRef = useRef<number>();
+  const start = useRef<number>(Date.now());
+
+  const animate = (time: number) => {
+    if (!isErasing) {
       const currentPhrase = phrases[currentPhraseIndex];
       const splitCurrentPhrase = splitHangul(currentPhrase);
 
-      if (!isErasing) {
-        // 타이핑 효과
-        if (currentText.length < splitCurrentPhrase.length) {
-          setCurrentText(splitCurrentPhrase.slice(0, currentText.length + 1));
-        } else {
-          setTimeout(() => setIsErasing(true), DELAY_BEFORE_ERASE);
-        }
+      if (currentText.length < splitCurrentPhrase.length) {
+        setCurrentText(splitCurrentPhrase.slice(0, currentText.length + 1));
       } else {
-        // 지우기 효과
-        if (currentText.length > 0) {
-          const words = currentText.split(" ");
-          words.pop();
-          setCurrentText(words.join(" "));
-        } else {
-          setIsErasing(false);
-          setCurrentPhraseIndex(
-            (prevIndex) => (prevIndex + 1) % phrases.length,
-          );
-        }
+        setTimeout(() => setIsErasing(true), DELAY_BEFORE_ERASE);
       }
-    };
+    } else {
+      if (currentText.length > 0) {
+        const words = currentText.split(" ");
+        words.pop();
+        setCurrentText(words.join(" "));
+      } else {
+        setIsErasing(false);
+        setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % phrases.length);
+      }
+    }
 
-    const typingTimeout = setTimeout(
-      handleTyping,
-      isErasing ? ERASING_SPEED : TYPING_SPEED,
-    );
+    start.current = time;
+    requestRef.current = requestAnimationFrame(animate);
+  };
 
-    return () => clearTimeout(typingTimeout); // 클린업 타이머
+  useEffect(() => {
+    requestRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(requestRef.current!);
   }, [currentText, isErasing]);
+
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setCursorVisible((prev) => !prev);
+    }, 500);
+
+    return () => clearInterval(cursorInterval);
+  }, []);
 
   return (
     <div className="container mx-auto mt-12 text-center">
@@ -165,7 +169,9 @@ const TestPage: React.FC = () => {
       </h1>
       <p aria-live="polite" className="inline-block text-lg">
         {combineHangul(currentText)}
-        <span className="animate-blink inline-block border-r-2 border-black">
+        <span
+          className={`inline-block border-r-2 border-black ${cursorVisible ? "opacity-100" : "opacity-0"}`}
+        >
           |
         </span>
       </p>
