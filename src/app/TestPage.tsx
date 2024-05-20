@@ -7,19 +7,19 @@ const TYPING_SPEED = 75; // 타이핑 속도 (밀리초 단위)
 const ERASING_SPEED = 100; // 지우기 속도 (밀리초 단위)
 const DELAY_BEFORE_ERASE = 2000; // 문장 완성 후 지우기 전 대기 시간 (밀리초 단위)
 
-const phrases = [
+const phrases: string[] = [
   "태양광? 그거 재활용도 안되는 쓰레기 아냐?",
   "전기 요금 올라간 원인이잖아!",
   "왜 하려는 거야 자꾸?",
 ];
 
 // 한글 자모 분리 함수
-const splitHangul = (str) => {
+const splitHangul = (str: string): string => {
   const INITIALS = "ᄀᄁᄂᄃᄄᄅᄆᄇᄈᄉᄊᄋᄌᄍᄎᄏᄐᄑᄒ";
   const MEDIALS = "ᅡᅢᅣᅤᅥᅦᅧᅨᅩᅪᅫᅬᅭᅮᅯᅰᅱᅲᅳᅴᅵ";
   const FINALS = "ᆨᆩᆪᆫᆬᆭᆮᆯᆰᆱᆲᆳᆴᆵᆶᆷᆸᆹᆺᆻᆼᆽᆾᆿᇀᇁᇂ";
 
-  const split = str.split("").map((char) => {
+  const split: string[] = str.split("").map((char: string): string => {
     const code = char.charCodeAt(0);
 
     if (code >= 0xac00 && code <= 0xd7a3) {
@@ -41,7 +41,7 @@ const splitHangul = (str) => {
 };
 
 // 한글 자모 결합 함수
-const combineHangul = (str) => {
+const combineHangul = (str: string): string => {
   const INITIALS = "ᄀᄁᄂᄃᄄᄅᄆᄇᄈᄉᄊᄋᄌᄍᄎᄏᄐᄑᄒ";
   const MEDIALS = "ᅡᅢᅣᅤᅥᅦᅧᅨᅩᅪᅫᅬᅭᅮᅯᅰᅱᅲᅳᅴᅵ";
   const FINALS = [
@@ -78,23 +78,26 @@ const combineHangul = (str) => {
   let result = "";
   let temp = "";
 
-  for (let i = 0; i < str.length; i++) {
-    if (INITIALS.includes(str[i])) {
+  for (const char of str) {
+    if (INITIALS.includes(char)) {
       if (temp.length > 0) {
         result += temp;
         temp = "";
       }
-      temp += str[i];
-    } else if (MEDIALS.includes(str[i])) {
-      temp += str[i];
-    } else if (FINALS.includes(str[i])) {
-      temp += str[i];
+      temp += char;
+    } else if (MEDIALS.includes(char)) {
+      temp += char;
+    } else if (FINALS.includes(char)) {
+      temp += char;
       const initialIndex = INITIALS.indexOf(temp[0]);
       const medialIndex = MEDIALS.indexOf(temp[1]);
       const finalIndex = FINALS.indexOf(temp[2]);
 
       const combinedChar = String.fromCharCode(
-        0xac00 + initialIndex * 588 + medialIndex * 28 + finalIndex,
+        0xac00 +
+          initialIndex * 588 +
+          medialIndex * 28 +
+          (finalIndex >= 0 ? finalIndex : 0),
       );
 
       result += combinedChar;
@@ -104,7 +107,7 @@ const combineHangul = (str) => {
         result += temp;
         temp = "";
       }
-      result += str[i];
+      result += char;
     }
   }
 
@@ -115,10 +118,10 @@ const combineHangul = (str) => {
   return result;
 };
 
-const TestPage = () => {
-  const [currentText, setCurrentText] = useState("");
-  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
-  const [isErasing, setIsErasing] = useState(false);
+const TestPage: React.FC = () => {
+  const [currentText, setCurrentText] = useState<string>("");
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number>(0);
+  const [isErasing, setIsErasing] = useState<boolean>(false);
 
   useEffect(() => {
     const handleTyping = () => {
@@ -135,7 +138,9 @@ const TestPage = () => {
       } else {
         // 지우기 효과
         if (currentText.length > 0) {
-          setCurrentText(currentText.slice(0, currentText.lastIndexOf(" ")));
+          const words = currentText.split(" ");
+          words.pop();
+          setCurrentText(words.join(" "));
         } else {
           setIsErasing(false);
           setCurrentPhraseIndex(
@@ -154,12 +159,16 @@ const TestPage = () => {
   }, [currentText, isErasing]);
 
   return (
-    <div
-      className="container"
-      style={{ textAlign: "center", marginTop: "50px" }}
-    >
-      <h1>태양광 하면 무슨 생각이 떠오르세요?</h1>
-      <p>{combineHangul(currentText)}</p>
+    <div className="container mx-auto mt-12 text-center">
+      <h1 className="mb-4 text-2xl font-bold">
+        태양광 하면 무슨 생각이 떠오르세요?
+      </h1>
+      <p aria-live="polite" className="inline-block text-lg">
+        {combineHangul(currentText)}
+        <span className="animate-blink inline-block border-r-2 border-black">
+          |
+        </span>
+      </p>
     </div>
   );
 };
