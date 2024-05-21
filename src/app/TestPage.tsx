@@ -125,7 +125,7 @@ const TestPage: React.FC = () => {
 
   useEffect(() => {
     const handleTyping = () => {
-      const currentPhrase = phrases[currentPhraseIndex];
+      const currentPhrase: string = phrases[currentPhraseIndex];
       const splitCurrentPhrase = splitHangul(currentPhrase);
 
       if (!isErasing) {

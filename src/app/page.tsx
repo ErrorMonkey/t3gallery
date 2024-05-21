@@ -11,8 +11,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <TestPage />
-      {/* <main className="">
+      {/* <TestPage /> */}
+      <main className="">
         <div className="flex flex-wrap gap-4">
           {images.map((post) => (
             <div key={post.id}></div>
@@ -24,7 +24,7 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
-      </main> */}
+      </main>
     </>
   );
 }
