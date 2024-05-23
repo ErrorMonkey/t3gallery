@@ -158,20 +158,41 @@ const TestPage: React.FC = () => {
     return () => clearTimeout(typingTimeout); // 클린업 타이머
   }, [currentText, isErasing]);
 
+  const frameCount = 60;
+  // const canvas = document.querySelector("canvas");
+
+  // if (canvas != null) {
+  //   const context = canvas.getContext("2d");
+
+  //   const currentFrame = (index) => {
+  //     `/videos/panel/output_${index.toString().padStart(4, "0")}.avif`;
+
+  //     const img = new Image();
+  //     img.src = currentFrame(1);
+
+  //     img.onload = () => {
+  //       context?.drawImage(img, 0, 0);
+  //     };
+  //   };
+  // }
+
   return (
-    <div className="container mx-auto mt-12 text-center">
-      <h1 className="mb-4 text-2xl font-bold">
+    <div className="container mx-auto mt-12 flex flex-col text-center">
+      <h1 className="mb-4 text-4xl font-bold">
         태양광 하면 무슨 생각이 떠오르세요?
       </h1>
-      <video autoPlay muted>
-        <source src="/videos/avifTest.avif" />
-      </video>
-      <p aria-live="polite" className="inline-block text-lg">
+      <p aria-live="polite" className="inline-block text-2xl">
         {combineHangul(currentText)}
         <span className="inline-block animate-blink border-r-2 border-black">
           |
         </span>
       </p>
+      {/* <video autoPlay muted className="m-[-10em] w-[100em]">
+        <source src="/videos/avifTest.avif" />
+      </video> */}
+      <canvas>
+        <img className="w-full" src="/videos/panel/output_0001.avif" />
+      </canvas>
     </div>
   );
 };
